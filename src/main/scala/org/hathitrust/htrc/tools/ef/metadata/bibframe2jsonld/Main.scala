@@ -22,7 +22,7 @@ object Main {
   val jsonldXsl: String = new File(System.getProperty("jsonld-xsl")).getAbsolutePath
 
   def main(args: Array[String]): Unit = {
-    val conf = new Conf(args)
+    val conf = new Conf(args.toIndexedSeq)
     val inputPath = conf.inputPath().toString
     val outputPath = conf.outputPath().toString
 
