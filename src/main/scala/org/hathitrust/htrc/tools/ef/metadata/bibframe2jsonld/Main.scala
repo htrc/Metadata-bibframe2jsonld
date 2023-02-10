@@ -59,7 +59,9 @@ object Main {
     val bibframeXmlRDD = sc.sequenceFile[String, String](inputPath, minPartitions = numPartitions)
 
     val errorsConvertBibframe2Jsonld = new ErrorAccumulator[(String, String), String](_._1)(sc)
-    val jsonldRDD = bibframeXmlRDD.tryMapValues(Helper.bibframeXml2Jsonld)(errorsConvertBibframe2Jsonld)
+    val jsonldRDD = bibframeXmlRDD.tryFlatMap { case (_, xml) =>
+      Helper.bibframeXml2Jsonld(xml)
+    }(errorsConvertBibframe2Jsonld)
 
 //    jsonldRDD
 //      .mapValues(_.toString())

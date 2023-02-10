@@ -2,14 +2,13 @@ package org.hathitrust.htrc.tools.ef.metadata.bibframe2jsonld
 
 import java.io.{ByteArrayInputStream, StringReader, StringWriter}
 import java.nio.file.{Files, Paths}
-
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.{StreamResult, StreamSource}
 import net.sf.saxon.Configuration
 import net.sf.saxon.lib.FeatureKeys
 import org.hathitrust.htrc.tools.ef.metadata.bibframe2jsonld.Main.jsonldXsl
 import org.slf4j.{Logger, LoggerFactory}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 
 object Helper {
   @transient lazy val logger: Logger = LoggerFactory.getLogger(Main.appName)
@@ -17,7 +16,7 @@ object Helper {
   val systemId: String = Paths.get(jsonldXsl).toUri.toString
   val xslBytes: Array[Byte] = Files.readAllBytes(Paths.get(jsonldXsl))
 
-  def bibframeXml2Jsonld(xmlString: String): JsValue = {
+  def bibframeXml2Jsonld(xmlString: String): List[(String, JsValue)] = {
     val xmlSource = new StreamSource(new StringReader(xmlString))
     val xslSource = new StreamSource(new ByteArrayInputStream(xslBytes))
     xslSource.setSystemId(systemId)
@@ -32,6 +31,8 @@ object Helper {
 
     val jsonString = xmlStringWriter.toString
 
-    Json.parse(jsonString)
+    // it is possible for a single bibframe xml record to contain multiple volumes
+    // the XSL has been adjusted to return a JSON where each (key,value) represents one volume
+    Json.parse(jsonString).as[JsObject].fields.toList
   }
 }

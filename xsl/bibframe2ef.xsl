@@ -20,6 +20,7 @@
 
     <xsl:template match='/'>
         <xsl:variable name="Item" select="/rdf:RDF/bf:Item[starts-with(@rdf:about,'http://hdl.handle.net/2027/')]"/>
+        <xsl:text>{</xsl:text>
         <xsl:for-each select="$Item">
             <xsl:variable name="volume_id" select="translate(translate(substring(./@rdf:about,28),'/','='),':','+')"/>
             <xsl:variable name="instance_id" select="./bf:itemOf/@rdf:resource"/>
@@ -27,8 +28,11 @@
             <xsl:variable name="work_id" select="$Instance/bf:instanceOf/@rdf:resource"/>
             <xsl:variable name="Work" select="/rdf:RDF/bf:Work[@rdf:about = $work_id][1]"/>
 
-            <xsl:text>{</xsl:text>
-            <xsl:text>"@context": "https://worksets.htrc.illinois.edu/context/ef_context.jsonld"</xsl:text>
+            <xsl:if test="position() != 1">
+                <xsl:text>,</xsl:text>
+            </xsl:if>
+            <xsl:text>"</xsl:text><xsl:value-of select="$volume_id"/><xsl:text>": {</xsl:text>
+            <xsl:text>"@context": "https://worksets.hathitrust.org/context/ef_context.jsonld"</xsl:text>
             <xsl:text>,"metadata":{</xsl:text>
             <xsl:text>"schemaVersion":"</xsl:text><xsl:value-of select="$schema_version"/><xsl:text>"</xsl:text>
             <xsl:text>,"id":"</xsl:text><xsl:value-of select="./@rdf:about"/><xsl:text>"</xsl:text>
@@ -157,6 +161,7 @@
             <xsl:text>}</xsl:text>
             <xsl:text>}</xsl:text>
         </xsl:for-each>
+        <xsl:text>}</xsl:text>
     </xsl:template>
 
     <xsl:template name="title">
