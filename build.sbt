@@ -51,7 +51,7 @@ lazy val `bibframe2jsonld` = (project in file("."))
   .enablePlugins(GitVersioning, GitBranchPrompt, JavaAppPackaging)
   .settings(commonSettings)
   .settings(ammoniteSettings)
-  //  .settings(spark("3.3.1"))
+//  .settings(spark("3.3.1"))
   .settings(spark_dev("3.3.1"))
   .settings(
     name := "bibframe2jsonld",
@@ -62,7 +62,7 @@ lazy val `bibframe2jsonld` = (project in file("."))
       "com.typesafe.play"       %% "play-json"        % "2.9.3",
       "org.scala-lang.modules"  %% "scala-xml"        % "1.2.0",
       "org.hathitrust.htrc"     %% "scala-utils"      % "2.13",
-      "org.hathitrust.htrc"     %% "spark-utils"      % "1.4",
+      "org.hathitrust.htrc"     %% "spark-utils"      % "1.5.2",
       "com.github.nscala-time"  %% "nscala-time"      % "2.32.0",
       "ch.qos.logback"          %  "logback-classic"  % "1.4.5",
       "org.codehaus.janino"     %  "janino"           % "3.0.16", // 3.1.x doesn't work: java.lang.ClassNotFoundException: org.codehaus.janino.InternalCompilerException
