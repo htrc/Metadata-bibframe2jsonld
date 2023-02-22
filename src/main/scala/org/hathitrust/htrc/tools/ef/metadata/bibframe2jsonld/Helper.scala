@@ -1,14 +1,15 @@
 package org.hathitrust.htrc.tools.ef.metadata.bibframe2jsonld
 
-import java.io.{ByteArrayInputStream, StringReader, StringWriter}
-import java.nio.file.{Files, Paths}
-import javax.xml.transform.TransformerFactory
-import javax.xml.transform.stream.{StreamResult, StreamSource}
 import net.sf.saxon.Configuration
 import net.sf.saxon.lib.FeatureKeys
 import org.hathitrust.htrc.tools.ef.metadata.bibframe2jsonld.Main.jsonldXsl
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.{JsObject, JsValue, Json}
+
+import java.io.{ByteArrayInputStream, StringReader, StringWriter}
+import java.nio.file.{Files, Paths}
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.stream.{StreamResult, StreamSource}
 
 object Helper {
   @transient lazy val logger: Logger = LoggerFactory.getLogger(Main.appName)
