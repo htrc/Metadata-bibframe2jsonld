@@ -1,5 +1,5 @@
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/htrc/Metadata-bibframe2jsonld/ci.yml?branch=main)](https://github.com/htrc/Metadata-bibframe2jsonld/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/github/htrc/Metadata-bibframe-entities/graph/badge.svg?token=2y6GAtWfnP)](https://codecov.io/github/htrc/Metadata-bibframe-entities)
+[![codecov](https://codecov.io/github/htrc/Metadata-bibframe2jsonld/graph/badge.svg?token=otalCjsK9m)](https://codecov.io/github/htrc/Metadata-bibframe2jsonld)
 [![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/htrc/Metadata-bibframe2jsonld?include_prereleases&sort=semver)](https://github.com/htrc/Metadata-bibframe2jsonld/releases/latest)
 
 # Metadata-bibframe2jsonld
@@ -22,6 +22,8 @@ marcjson2bibframexml
                               input set of HT IDs into, for increased
                               parallelism
   -o, --output  <DIR>         Write the output to DIR
+  -s, --save-as-seq           (Optional) Saves the EF files as Hadoop sequence
+                              files
       --spark-log  <FILE>     (Optional) Where to write logging output from
                               Spark to
   -h, --help                  Show help message
