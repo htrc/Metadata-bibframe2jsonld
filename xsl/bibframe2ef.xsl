@@ -96,8 +96,15 @@
             <xsl:if test="./dct:accessRights">
                 <xsl:text>,"accessRights":"</xsl:text><xsl:value-of select="./dct:accessRights/text()" /><xsl:text>"</xsl:text>
             </xsl:if>
-            <xsl:if test="./htrc:accessProfile">
-                <xsl:text>,"accessProfile":"</xsl:text><xsl:value-of select="./htrc:accessProfile/text()" /><xsl:text>"</xsl:text>
+            <xsl:if test="./dct:accessRights">
+                <xsl:choose>
+                    <xsl:when test="./dct:accessRights/text() = 'pd'">
+                        <xsl:text>,"isAccessibleForFree": true</xsl:text>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:text>,"isAccessibleForFree": false</xsl:text>
+                    </xsl:otherwise>
+                </xsl:choose>
             </xsl:if>
             <xsl:if test="./htrc:contentProviderAgent/@rdf:resource">
                 <xsl:text>,"sourceInstitution":{</xsl:text>

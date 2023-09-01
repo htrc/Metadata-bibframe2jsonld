@@ -2,7 +2,6 @@ package org.hathitrust.htrc.tools.ef.metadata.bibframe2jsonld
 
 import java.io.File
 import java.nio.charset.StandardCharsets
-
 import com.gilt.gfc.time.Timer
 import com.sun.org.apache.bcel.internal.generic._
 import org.apache.commons.io.FileUtils
@@ -12,6 +11,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.hathitrust.htrc.tools.ef.metadata.bibframe2jsonld.Helper.logger
 import org.hathitrust.htrc.tools.spark.errorhandling.ErrorAccumulator
 import org.hathitrust.htrc.tools.spark.errorhandling.RddExtensions._
+import org.hathitrust.htrc.tools.spark.utils.Helper.stopSparkAndExit
 import play.api.libs.json.Json
 
 import scala.io.Codec
@@ -25,64 +25,75 @@ object Main {
     val conf = new Conf(args.toIndexedSeq)
     val inputPath = conf.inputPath().toString
     val outputPath = conf.outputPath().toString
-
-    conf.outputPath().mkdirs()
+    val saveAsSeqFile = conf.saveAsSeqFile()
 
     // set up logging destination
-    conf.sparkLog.toOption match {
-      case Some(logFile) => System.setProperty("spark.logFile", logFile)
-      case None =>
-    }
+    conf.sparkLog.foreach(System.setProperty("spark.logFile", _))
     System.setProperty("logLevel", conf.logLevel().toUpperCase)
+
+    implicit val codec: Codec = Codec.UTF8
 
     // set up Spark context
     val sparkConf = new SparkConf()
     sparkConf.setAppName(appName)
     sparkConf.setIfMissing("spark.master", "local[*]")
+    val sparkMaster = sparkConf.get("spark.master")
 
     val spark = SparkSession.builder()
       .config(sparkConf)
       .getOrCreate()
 
-    implicit val sc: SparkContext = spark.sparkContext
-    implicit val codec: Codec = Codec.UTF8
+    val sc = spark.sparkContext
 
     val numPartitions = conf.numPartitions.getOrElse(sc.defaultMinPartitions)
 
-    logger.info("Starting...")
+    try {
+      logger.info("Starting...")
+      logger.info(s"Spark master: $sparkMaster")
 
-    // record start time
-    val t0 = System.nanoTime()
+      logger.info(s"Using XSL: $jsonldXsl")
 
-    logger.info(s"Using XSL: $jsonldXsl")
+      // record start time
+      val t0 = System.nanoTime()
 
-    val bibframeXmlRDD = sc.sequenceFile[String, String](inputPath, minPartitions = numPartitions)
+      conf.outputPath().mkdirs()
 
-    val errorsConvertBibframe2Jsonld = new ErrorAccumulator[(String, String), String](_._1)(sc)
-    val jsonldRDD = bibframeXmlRDD.tryFlatMap { case (_, xml) =>
-      Helper.bibframeXml2Jsonld(xml)
-    }(errorsConvertBibframe2Jsonld)
+      val bibframeXmlRDD = sc.sequenceFile[String, String](inputPath, minPartitions = numPartitions)
 
-//    jsonldRDD
-//      .mapValues(_.toString())
-//      .saveAsSequenceFile(outputPath + "/output", Some(classOf[org.apache.hadoop.io.compress.BZip2Codec]))
+      val errorsConvertBibframe2Jsonld = new ErrorAccumulator[(String, String), String](_._1)(sc)
+      val jsonldRDD = bibframeXmlRDD.tryFlatMap { case (_, xml) =>
+        Helper.bibframeXml2Jsonld(xml)
+      }(errorsConvertBibframe2Jsonld)
 
-    jsonldRDD.foreach { case (id, json) =>
-      val cleanId = id.replace(":", "+").replace("/", "=")
-      FileUtils.writeStringToFile(new File(outputPath, s"$cleanId.json"), Json.prettyPrint(json), StandardCharsets.UTF_8)
+      if (saveAsSeqFile)
+        jsonldRDD
+          .mapValues(_.toString())
+          .saveAsSequenceFile(outputPath + "/output", Some(classOf[org.apache.hadoop.io.compress.BZip2Codec]))
+      else
+        jsonldRDD.foreach { case (id, json) =>
+          val cleanId = id.replace(":", "+").replace("/", "=")
+          FileUtils.writeStringToFile(new File(outputPath, s"$cleanId.json"), Json.prettyPrint(json), StandardCharsets.UTF_8)
+        }
+
+      if (errorsConvertBibframe2Jsonld.nonEmpty)
+        logger.info("Writing error report(s)...")
+
+      if (errorsConvertBibframe2Jsonld.nonEmpty)
+        errorsConvertBibframe2Jsonld.saveErrors(new Path(outputPath, "bibframe2jsonld_errors.txt"), _.toString)
+
+      // record elapsed time and report it
+      val t1 = System.nanoTime()
+      val elapsed = t1 - t0
+
+      logger.info(f"All done in ${Timer.pretty(elapsed)}")
+    }
+    catch {
+      case e: Throwable =>
+        logger.error(s"Uncaught exception", e)
+        stopSparkAndExit(sc, exitCode = 500)
     }
 
-    if (errorsConvertBibframe2Jsonld.nonEmpty)
-      logger.info("Writing error report(s)...")
-
-    if (errorsConvertBibframe2Jsonld.nonEmpty)
-      errorsConvertBibframe2Jsonld.saveErrors(new Path(outputPath, "bibframe2jsonld_errors.txt"), _.toString)
-
-    // record elapsed time and report it
-    val t1 = System.nanoTime()
-    val elapsed = t1 - t0
-
-    logger.info(f"All done in ${Timer.pretty(elapsed)}")
+    stopSparkAndExit(sc)
   }
 
 }
