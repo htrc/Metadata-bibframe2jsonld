@@ -7,7 +7,7 @@ import com.sun.org.apache.bcel.internal.generic._
 import org.apache.commons.io.FileUtils
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.SparkConf
 import org.hathitrust.htrc.tools.ef.metadata.bibframe2jsonld.Helper.logger
 import org.hathitrust.htrc.tools.spark.errorhandling.ErrorAccumulator
 import org.hathitrust.htrc.tools.spark.errorhandling.RddExtensions._
