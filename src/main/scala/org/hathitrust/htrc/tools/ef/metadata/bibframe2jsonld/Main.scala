@@ -18,7 +18,7 @@ import scala.io.Codec
 import scala.language.reflectiveCalls
 
 object Main {
-  val appName: String = "marcjson2bibframexml"
+  val appName: String = "bibframe2jsonld"
   val jsonldXsl: String = new File(System.getProperty("jsonld-xsl")).getAbsolutePath
 
   def main(args: Array[String]): Unit = {
