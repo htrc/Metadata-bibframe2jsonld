@@ -22,7 +22,7 @@
         <xsl:variable name="Item" select="/rdf:RDF/bf:Item[starts-with(@rdf:about,'http://hdl.handle.net/2027/')]" />
         <xsl:text>{</xsl:text>
         <xsl:for-each select="$Item">
-            <xsl:variable name="volume_id" select="translate(translate(substring(./@rdf:about,28),'/','='),':','+')" />
+            <xsl:variable name="volume_id" select="substring(./@rdf:about,28)" />
             <xsl:variable name="instance_id" select="./bf:itemOf/@rdf:resource" />
             <xsl:variable name="Instance" select="/rdf:RDF/bf:Instance[@rdf:about = $instance_id][1]" />
             <xsl:variable name="work_id" select="$Instance/bf:instanceOf/@rdf:resource" />
